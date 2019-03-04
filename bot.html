@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Title of the document</title>
+</head>
+
+<body>
+        <script>
+
+                content = '내일\n';
+                content += '1. 4시 송파\n';
+                content += 'G 2. 11시30분 도착 - 영등포(그랜져급 재콜 금지)\n';
+                content += '3. 4시 금천시흥\n';
+                content += '4. 6시 고양\n';
+                content += 'G 5. 21시25분 김공도착 - 수지(콜비무)\n';
+                content += 'G 6. 패키지\n';
+                content += '5시 염창\n';
+                content += '6시 도착 - 서초\n';
+                content += '7.패키지\n';
+                content += '4시 금천\n';
+                content += '5시15분 도착 - 마포\n';
+                content += '8. 4시50분 영등포\n';
+                content += '9. 16시45분 도착 - 용산\n';
+                confirm += '10. 17시35분 도착 - 안양\n';                
+                content += '11. 15시 구리\n';
+
+                
+                function response(room, msg, sender, isGroupChat, relier, imageDB) {
+                    var targetLocation = ["송파", "도봉", "구리"];
+                    var targetTime = ["3", "4"];
+
+                    var packageIndex = null;
+                    var findedLocationIndex = [];
+                    
+                    //줄 단위로 변경
+                    var line = msg.split(/\r?\n/);
+                    if (line.length == 0) {
+                        return;
+                    }
+
+
+                    for(i=0;i<line.length;i++) {
+                        //앞뒤 공백제거
+                        var text = line[i].trim();
+
+                        //문장내 공백제거
+                        text = text.replace(/ /gi, "");
+
+                        //console.log(text);
+
+                        //패키지 찾기
+                        var rePackage = /([0-9]{1,2})\.패키지/;
+                        var packageMatch = rePackage.exec(text);
+                        if (packageIndex == null && packageMatch != null) {
+                            packageIndex= packageMatch[1];
+                            //console.log("package" + packageIndex);
+                        }
+
+                        //지역 찾기
+                        for (j=0;j<targetLocation.length;j++) {
+                            if(text.indexOf(targetLocation[j]) != -1) {
+                                var reLocation = /([0-9]{1,2})\.([0-9]{1,2})시/
+                                var locMatch = reLocation.exec(text);
+                                if (locMatch != null) {
+                                    var index = locMatch[1];
+                                    var time = locMatch[2];
+
+                                    if (targetTime.indexOf(time)) {
+                                        //console.log(locMatch);
+                                        findedLocationIndex.push(index);
+                                        continue;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    //console.log("RESULT");
+
+                    if (packageIndex != null) {
+                        //console.log("package: " + packageIndex);
+                        relier.reply(packageIndex);
+                    }
+
+                    if (findedLocationIndex.length > 0) {
+                        //console.log("locaton: " + findedLocationIndex);
+                        relier.reply(findedLocationIndex[0]);
+                    }
+                } 
+                
+                response(1, content, "me", 1, 1, 1);
+                </script>
+</body>
+</html>
